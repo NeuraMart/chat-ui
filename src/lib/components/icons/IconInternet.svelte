@@ -10,7 +10,6 @@
 	role="img"
 	width="1em"
 	height="1em"
-	fill="currentColor"
 	preserveAspectRatio="xMidYMid meet"
 	viewBox="0 0 20 20"
 >

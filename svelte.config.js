@@ -23,6 +23,11 @@ const config = {
 			// handled in hooks.server.ts, because we can have multiple valid origins
 			checkOrigin: false,
 		},
+
+		// for shadcn-svelte library
+		alias: {
+			"@/*": "./path/to/lib/*",
+		},
 	},
 };
 

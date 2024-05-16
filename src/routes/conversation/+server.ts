@@ -39,7 +39,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		);
 	}
 
-	const model = models.find((m) => (m.id || m.name) === values.model);
+	const model = models.find((m) => m.name === values.model);
 
 	if (!model) {
 		throw error(400, "Invalid model");
@@ -105,7 +105,6 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		assistantId: values.assistantId ? new ObjectId(values.assistantId) : undefined,
 		createdAt: new Date(),
 		updatedAt: new Date(),
-		userAgent: request.headers.get("User-Agent") ?? undefined,
 		embeddingModel,
 		...(locals.user ? { userId: locals.user._id } : { sessionId: locals.sessionId }),
 		...(values.fromShare ? { meta: { fromShareId: values.fromShare } } : {}),

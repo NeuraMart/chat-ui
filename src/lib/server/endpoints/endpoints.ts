@@ -6,10 +6,6 @@ import endpointAws, { endpointAwsParametersSchema } from "./aws/endpointAws";
 import { endpointOAIParametersSchema, endpointOai } from "./openai/endpointOai";
 import endpointLlamacpp, { endpointLlamacppParametersSchema } from "./llamacpp/endpointLlamacpp";
 import endpointOllama, { endpointOllamaParametersSchema } from "./ollama/endpointOllama";
-import {
-	endpointAnthropic,
-	endpointAnthropicParametersSchema,
-} from "./anthropic/endpointAnthropic";
 
 // parameters passed when generating text
 export interface EndpointParameters {
@@ -32,7 +28,6 @@ export type EndpointGenerator<T extends CommonEndpoint> = (parameters: T) => End
 // list of all endpoint generators
 export const endpoints = {
 	tgi: endpointTgi,
-	anthropic: endpointAnthropic,
 	aws: endpointAws,
 	openai: endpointOai,
 	llamacpp: endpointLlamacpp,
@@ -40,7 +35,6 @@ export const endpoints = {
 };
 
 export const endpointSchema = z.discriminatedUnion("type", [
-	endpointAnthropicParametersSchema,
 	endpointAwsParametersSchema,
 	endpointOAIParametersSchema,
 	endpointTgiParametersSchema,

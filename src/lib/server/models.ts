@@ -28,15 +28,6 @@ const modelConfig = z.object({
 	logoUrl: z.string().url().optional(),
 	websiteUrl: z.string().url().optional(),
 	modelUrl: z.string().url().optional(),
-	tokenizer: z
-		.union([
-			z.string(),
-			z.object({
-				tokenizerUrl: z.string().url(),
-				tokenizerConfigUrl: z.string().url(),
-			}),
-		])
-		.optional(),
 	datasetName: z.string().min(1).optional(),
 	datasetUrl: z.string().url().optional(),
 	userMessageToken: z.string().default(""),
@@ -118,8 +109,6 @@ const addEndpoint = (m: Awaited<ReturnType<typeof processModel>>) => ({
 				switch (args.type) {
 					case "tgi":
 						return endpoints.tgi(args);
-					case "anthropic":
-						return endpoints.anthropic(args);
 					case "aws":
 						return await endpoints.aws(args);
 					case "openai":

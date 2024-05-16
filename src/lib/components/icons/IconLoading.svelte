@@ -1,18 +1,14 @@
 <script lang="ts">
 	export let classNames = "";
+	import { Skeleton } from "$lib/components/ui/skeleton/index.js";
 </script>
 
 <div class={"inline-flex h-8 flex-none items-center gap-1 " + classNames}>
-	<div
-		class="h-1 w-1 flex-none animate-bounce rounded-full bg-gray-500 dark:bg-gray-400"
-		style="animation-delay: 0.25s;"
-	/>
-	<div
-		class="h-1 w-1 flex-none animate-bounce rounded-full bg-gray-500 dark:bg-gray-400"
-		style="animation-delay: 0.5s;"
-	/>
-	<div
-		class="h-1 w-1 flex-none animate-bounce rounded-full bg-gray-500 dark:bg-gray-400"
-		style="animation-delay: 0.75s;"
-	/>
+	<div class="flex items-center space-x-4">
+		<Skeleton class="h-12 w-12 rounded-full" />
+		<div class="space-y-2">
+			<Skeleton class="h-4 w-[500px]" />
+			<Skeleton class="h-4 w-[200px]" />
+		</div>
+	</div>
 </div>

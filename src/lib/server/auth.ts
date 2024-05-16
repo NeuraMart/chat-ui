@@ -6,7 +6,6 @@ import {
 	OPENID_CLIENT_SECRET,
 	OPENID_PROVIDER_URL,
 	OPENID_SCOPES,
-	OPENID_NAME_CLAIM,
 	OPENID_TOLERANCE,
 	OPENID_RESOURCE,
 	OPENID_CONFIG,
@@ -33,16 +32,12 @@ const stringWithDefault = (value: string) =>
 		.default(value)
 		.transform((el) => (el ? el : value));
 
-export const OIDConfig = z
+const OIDConfig = z
 	.object({
 		CLIENT_ID: stringWithDefault(OPENID_CLIENT_ID),
 		CLIENT_SECRET: stringWithDefault(OPENID_CLIENT_SECRET),
 		PROVIDER_URL: stringWithDefault(OPENID_PROVIDER_URL),
 		SCOPES: stringWithDefault(OPENID_SCOPES),
-		NAME_CLAIM: stringWithDefault(OPENID_NAME_CLAIM).refine(
-			(el) => !["preferred_username", "email", "picture", "sub"].includes(el),
-			{ message: "nameClaim cannot be one of the restricted keys." }
-		),
 		TOLERANCE: stringWithDefault(OPENID_TOLERANCE),
 		RESOURCE: stringWithDefault(OPENID_RESOURCE),
 	})

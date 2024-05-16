@@ -77,10 +77,6 @@
 		return `<code>${code.replaceAll("&amp;", "&")}</code>`;
 	};
 
-	renderer.link = (href, title, text) => {
-		return `<a href="${href?.replace(/>$/, "")}" target="_blank" rel="noreferrer">${text}</a>`;
-	};
-
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { extensions, ...defaults } = marked.getDefaults() as marked.MarkedOptions & {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,24 +177,16 @@
 
 {#if message.from === "assistant"}
 	<div
-		class="group relative -mb-6 flex items-start justify-start gap-4 pb-4 leading-relaxed"
+		class="leading-1.5 ml-2 flex w-fit max-w-[750px] flex-col rounded-e-xl rounded-es-xl border-gray-200 bg-gray-100 px-4 pb-4 pt-0 text-base dark:bg-gray-700"
 		role="presentation"
 		on:click={() => (isTapped = !isTapped)}
 		on:keydown={() => (isTapped = !isTapped)}
 	>
-		{#if $page.data?.assistant?.avatar}
-			<img
-				src="{base}/settings/assistants/{$page.data.assistant._id}/avatar.jpg"
-				alt="Avatar"
-				class="mt-5 h-3 w-3 flex-none select-none rounded-full shadow-lg"
-			/>
-		{:else}
-			<img
-				alt=""
-				src="https://huggingface.co/avatars/2edb18bd0206c16b433841a47f53fa8e.svg"
-				class="mt-5 h-3 w-3 flex-none select-none rounded-full shadow-lg"
-			/>
-		{/if}
+		<div
+			class="left relative -left-8 top-0 -z-10 h-0 w-0 rounded border-l-[20px] border-r-[20px] border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-700"
+		/>
+		<!-- arrow -->
+
 		<div
 			class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300"
 		>
@@ -299,12 +287,21 @@
 {/if}
 {#if message.from === "user"}
 	<div
-		class="group relative w-full items-start justify-start gap-4 max-sm:text-sm"
+		class="leading-1.5 ml-2 flex w-fit max-w-[750px] flex-col self-end rounded-bl-xl rounded-br-xl rounded-tl-xl border-gray-200 bg-gray-100 pb-4 pl-4 pr-4 pt-0 text-base dark:bg-gray-700"
 		role="presentation"
 		on:click={() => (isTapped = !isTapped)}
 		on:keydown={() => (isTapped = !isTapped)}
 	>
-		<div class="flex w-full flex-col">
+		<div
+			class="left relative -right-[87px] top-0 -z-10 h-0
+  w-0 rounded
+  border-l-[20px] border-r-[20px]
+  border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-700"
+		/>
+		<!-- arrow -->
+		<div
+			class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300"
+		>
 			{#if message.files && message.files.length > 0}
 				<div class="mx-auto grid w-fit grid-cols-2 gap-5 px-5">
 					{#each message.files as file}
@@ -327,10 +324,12 @@
 				</div>
 			{/if}
 
-			<div class="flex w-full flex-row flex-nowrap">
+			<div
+				class="prose max-w-none max-sm:prose-sm dark:prose-invert prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
+			>
 				{#if !editMode}
 					<p
-						class="disabled w-full appearance-none whitespace-break-spaces text-wrap break-words bg-inherit px-5 py-3.5 text-gray-500 dark:text-gray-400"
+						class="disabled m-0 w-full appearance-none whitespace-break-spaces text-wrap break-words bg-inherit p-0 text-gray-500 dark:text-gray-400"
 					>
 						{message.content.trim()}
 					</p>

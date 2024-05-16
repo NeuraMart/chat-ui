@@ -1,7 +1,7 @@
 {
 	"background_color": "#ffffff",
-	"name": "Chat UI",
-	"short_name": "Chat UI",
+	"name": "Neuramart",
+	"short_name": "Neuramart",
 	"display": "standalone",
 	"start_url": "/",
 	"icons": [

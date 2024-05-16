@@ -5,14 +5,11 @@
 
 	import { onMount } from "svelte";
 	import { applyAction, enhance } from "$app/forms";
-	import { page } from "$app/stores";
 	import { base } from "$app/paths";
 	import CarbonPen from "~icons/carbon/pen";
 	import CarbonUpload from "~icons/carbon/upload";
 
 	import { useSettingsStore } from "$lib/stores/settings";
-	import { isHuggingChat } from "$lib/utils/isHuggingChat";
-	import TokensCounter from "./TokensCounter.svelte";
 
 	type ActionData = {
 		error: boolean;
@@ -29,10 +26,8 @@
 	export let models: Model[] = [];
 
 	let files: FileList | null = null;
+
 	const settings = useSettingsStore();
-	let modelId =
-		assistant?.modelId ?? models.find((_model) => _model.id === $settings.activeModel)?.name;
-	let systemPrompt = assistant?.preprompt ?? "";
 
 	let compress: typeof readAndCompressImage | null = null;
 
@@ -76,14 +71,6 @@
 	let deleteExistingAvatar = false;
 
 	let loading = false;
-
-	let ragMode: false | "links" | "domains" | "all" = assistant?.rag?.allowAllDomains
-		? "all"
-		: assistant?.rag?.allowedLinks?.length ?? 0 > 0
-		? "links"
-		: (assistant?.rag?.allowedDomains?.length ?? 0) > 0
-		? "domains"
-		: false;
 </script>
 
 <form
@@ -116,24 +103,6 @@
 			}
 		}
 
-		formData.delete("ragMode");
-
-		if (ragMode === false || !$page.data.enableAssistantsRAG) {
-			formData.set("ragAllowAll", "false");
-			formData.set("ragLinkList", "");
-			formData.set("ragDomainList", "");
-		} else if (ragMode === "all") {
-			formData.set("ragAllowAll", "true");
-			formData.set("ragLinkList", "");
-			formData.set("ragDomainList", "");
-		} else if (ragMode === "links") {
-			formData.set("ragAllowAll", "false");
-			formData.set("ragDomainList", "");
-		} else if (ragMode === "domains") {
-			formData.set("ragAllowAll", "false");
-			formData.set("ragLinkList", "");
-		}
-
 		return async ({ result }) => {
 			loading = false;
 			await applyAction(result);
@@ -157,7 +126,7 @@
 	{/if}
 
 	<div class="grid h-full w-full flex-1 grid-cols-2 gap-6 text-sm max-sm:grid-cols-1">
-		<div class="col-span-1 flex flex-col gap-4">
+		<div class="flex flex-col gap-4">
 			<div>
 				<div class="mb-1 block pb-2 text-sm font-semibold">Avatar</div>
 				<input
@@ -241,11 +210,7 @@
 
 			<label>
 				<div class="mb-1 font-semibold">Model</div>
-				<select
-					name="modelId"
-					class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-					bind:value={modelId}
-				>
+				<select name="modelId" class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2">
 					{#each models.filter((model) => !model.unlisted) as model}
 						<option
 							value={model.id}
@@ -290,137 +255,21 @@
 				</div>
 				<p class="text-xs text-red-500">{getError("inputMessage1", form)}</p>
 			</label>
-			{#if $page.data.enableAssistantsRAG}
-				<div class="mb-4 flex flex-col flex-nowrap">
-					<span class="mt-2 text-smd font-semibold"
-						>Internet access <span
-							class="ml-1 rounded bg-gray-100 px-1 py-0.5 text-xxs font-normal text-gray-600"
-							>Experimental</span
-						>
-
-						{#if isHuggingChat}
-							<a
-								href="https://huggingface.co/spaces/huggingchat/chat-ui/discussions/385"
-								target="_blank"
-								class="ml-0.5 rounded bg-gray-100 px-1 py-0.5 text-xxs font-normal text-gray-700 underline decoration-gray-400"
-								>Give feedback</a
-							>
-						{/if}
-					</span>
-
-					<label class="mt-1">
-						<input
-							checked={!ragMode}
-							on:change={() => (ragMode = false)}
-							type="radio"
-							name="ragMode"
-							value={false}
-						/>
-						<span class="my-2 text-sm" class:font-semibold={!ragMode}> Disabled </span>
-						{#if !ragMode}
-							<span class="block text-xs text-gray-500">
-								Assistant won't look for information from Internet and will be faster to answer.
-							</span>
-						{/if}
-					</label>
-
-					<label class="mt-1">
-						<input
-							checked={ragMode === "all"}
-							on:change={() => (ragMode = "all")}
-							type="radio"
-							name="ragMode"
-							value={"all"}
-						/>
-						<span class="my-2 text-sm" class:font-semibold={ragMode === "all"}> Web search </span>
-						{#if ragMode === "all"}
-							<span class="block text-xs text-gray-500">
-								Assistant will do a web search on each user request to find information.
-							</span>
-						{/if}
-					</label>
-
-					<label class="mt-1">
-						<input
-							checked={ragMode === "domains"}
-							on:change={() => (ragMode = "domains")}
-							type="radio"
-							name="ragMode"
-							value={false}
-						/>
-						<span class="my-2 text-sm" class:font-semibold={ragMode === "domains"}>
-							Domains search
-						</span>
-					</label>
-					{#if ragMode === "domains"}
-						<span class="mb-2 text-xs text-gray-500">
-							Specify domains and URLs that the application can search, separated by commas.
-						</span>
-
-						<input
-							name="ragDomainList"
-							class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-							placeholder="wikipedia.org,bbc.com"
-							value={assistant?.rag?.allowedDomains?.join(",") ?? ""}
-						/>
-						<p class="text-xs text-red-500">{getError("ragDomainList", form)}</p>
-					{/if}
-
-					<label class="mt-1">
-						<input
-							checked={ragMode === "links"}
-							on:change={() => (ragMode = "links")}
-							type="radio"
-							name="ragMode"
-							value={false}
-						/>
-						<span class="my-2 text-sm" class:font-semibold={ragMode === "links"}>
-							Specific Links
-						</span>
-					</label>
-					{#if ragMode === "links"}
-						<span class="mb-2 text-xs text-gray-500">
-							Specify a maximum of 10 direct URLs that the Assistant will access. HTML & Plain Text
-							only, separated by commas
-						</span>
-						<input
-							name="ragLinkList"
-							class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-							placeholder="https://raw.githubusercontent.com/huggingface/chat-ui/main/README.md"
-							value={assistant?.rag?.allowedLinks.join(",") ?? ""}
-						/>
-						<p class="text-xs text-red-500">{getError("ragLinkList", form)}</p>
-					{/if}
-				</div>
-			{/if}
 		</div>
 
-		<div class="col-span-1 flex h-full flex-col">
-			<span class="mb-1 text-sm font-semibold"> Instructions (system prompt) </span>
-			<div class="relative mb-20 flex min-h-[8lh] flex-1 grow flex-col">
-				<textarea
-					name="preprompt"
-					class="flex-1 rounded-lg border-2 border-gray-200 bg-gray-100 p-2 text-sm"
-					placeholder="You'll act as..."
-					bind:value={systemPrompt}
-				/>
-				{#if modelId}
-					{@const model = models.find((_model) => _model.id === modelId)}
-					{#if model?.tokenizer && systemPrompt}
-						<TokensCounter
-							classNames="absolute bottom-2 right-2"
-							prompt={systemPrompt}
-							modelTokenizer={model.tokenizer}
-							truncate={model?.parameters?.truncate}
-						/>
-					{/if}
-				{/if}
-			</div>
+		<label class="flex flex-col">
+			<div class="mb-1 text-sm font-semibold">Instructions (system prompt)</div>
+			<textarea
+				name="preprompt"
+				class="min-h-[8lh] flex-1 rounded-lg border-2 border-gray-200 bg-gray-100 p-2 text-sm"
+				placeholder="You'll act as..."
+				value={assistant?.preprompt ?? ""}
+			/>
 			<p class="text-xs text-red-500">{getError("preprompt", form)}</p>
-		</div>
+		</label>
 	</div>
 
-	<div class="fixed bottom-6 right-6 ml-auto mt-6 flex w-fit justify-end gap-2 sm:absolute">
+	<div class="mt-6 flex justify-end gap-2">
 		<a
 			href={assistant ? `${base}/settings/assistants/${assistant?._id}` : `${base}/settings`}
 			class="flex items-center justify-center rounded-full bg-gray-200 px-5 py-2 font-semibold text-gray-600"

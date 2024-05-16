@@ -8,6 +8,7 @@
 	import CarbonClose from "~icons/carbon/close";
 	import CarbonEdit from "~icons/carbon/edit";
 	import type { ConvSidebar } from "$lib/types/ConvSidebar";
+	import CarbonChat from "~icons/carbon/chat";
 
 	export let conv: ConvSidebar;
 
@@ -25,9 +26,9 @@
 		confirmDelete = false;
 	}}
 	href="{base}/conversation/{conv.id}"
-	class="group flex h-10 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 {conv.id ===
+	class="group flex h-10 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 {conv.id ===
 	$page.params.id
-		? 'bg-gray-100 dark:bg-gray-700'
+		? 'bg-gray-100 dark:bg-gray-800'
 		: ''}"
 >
 	<div class="flex flex-1 items-center truncate">
@@ -40,14 +41,17 @@
 				alt="Assistant avatar"
 				class="mr-1.5 inline size-4 flex-none rounded-full object-cover"
 			/>
-			{conv.title.replace(/\p{Emoji}/gu, "")}
+			{conv.title}
 		{:else if conv.assistantId}
 			<div
 				class="mr-1.5 flex size-4 flex-none items-center justify-center rounded-full bg-gray-300 text-xs font-bold uppercase text-gray-500"
 			/>
 			{conv.title.replace(/\p{Emoji}/gu, "")}
 		{:else}
-			{conv.title}
+			<div class="flex items-center justify-center gap-1.5">
+				<CarbonChat />
+				<span>{conv.title.replace(/\p{Emoji}/gu, "")}</span>
+			</div>
 		{/if}
 	</div>
 

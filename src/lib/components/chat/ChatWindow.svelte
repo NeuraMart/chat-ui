@@ -32,6 +32,12 @@
 	import SystemPromptModal from "../SystemPromptModal.svelte";
 	import ChatIntroduction from "./ChatIntroduction.svelte";
 	import { useConvTreeStore } from "$lib/stores/convTree";
+	import { Textarea } from "$lib/components/ui/textarea";
+	import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+
+	import * as Select from "$lib/components/ui/select/index.js";
+	import * as Avatar from "$lib/components/ui/avatar/index.js";
+	import { useSettingsStore } from "$lib/stores/settings";
 
 	export let messages: Message[] = [];
 	export let loading = false;
@@ -122,9 +128,60 @@
 	$: if (lastMessage && lastMessage.from === "user") {
 		scrollToBottom();
 	}
+
+	const availableModels: [] = $page.data.models.map((model) => ({
+		label: model.name,
+		value: model.id,
+	}));
+
+	const settings = useSettingsStore();
+	let isFocused = false;
+	// if (messages.length > 0) console.log("Clicked");
+	// If messages array length changes we will use transition
 </script>
 
-<div class="relative min-h-0 min-w-0">
+<div class=" relative min-h-0 min-w-0">
+	<div
+		class="flex-no-wrap fixed relative top-0 mx-0 mb-1 mt-1.5 flex w-full justify-between px-4 py-0 lg:flex-wrap lg:py-4"
+	>
+		<Select.Root
+			onSelectedChange={(v) => {
+				v && ($settings.activeModel = v.value);
+			}}
+		>
+			<Select.Trigger class="w-[180px]">
+				<Select.Value placeholder={$settings.activeModel} />
+			</Select.Trigger>
+			<Select.Content>
+				<Select.Group>
+					{#each availableModels as model}
+						<Select.Item value={model.value} label={model.label}>{model.label}</Select.Item>
+					{/each}
+				</Select.Group>
+			</Select.Content>
+			<Select.Input name="favoriteModel" />
+		</Select.Root>
+
+		<Tooltip.Root>
+			<Tooltip.Trigger class="min-h-[15px] {isFocused ? 'w-1/2' : 'w-1/4'}">
+				<Textarea
+					class="resize-none bg-gray-100 dark:bg-gray-800"
+					placeholder="Enter system prompt"
+					on:focus={() => (isFocused = true)}
+					on:blur={() => (isFocused = false)}
+					bind:value={$settings.customPrompts[$settings.activeModel]}
+				/>
+			</Tooltip.Trigger>
+			<Tooltip.Content>
+				<p>This is your system prompt</p>
+			</Tooltip.Content>
+		</Tooltip.Root>
+
+		<Avatar.Root>
+			<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
+			<Avatar.Fallback>CN</Avatar.Fallback>
+		</Avatar.Root>
+	</div>
 	{#if loginModalOpen}
 		<LoginModal
 			on:close={() => {
@@ -138,7 +195,7 @@
 		bind:this={chatContainer}
 	>
 		<div class="mx-auto flex h-full max-w-3xl flex-col gap-6 px-5 pt-6 sm:gap-8 xl:max-w-4xl">
-			{#if $page.data?.assistant && !!messages.length}
+			{#if $page.data?.assistant}
 				<a
 					class="mx-auto flex items-center gap-1.5 rounded-full border border-gray-100 bg-gray-50 py-1 pl-1 pr-3 text-sm text-gray-800 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
 					href="{base}/settings/assistants/{$page.data.assistant._id}"
@@ -376,7 +433,7 @@
 							<CarbonCheckmark class="text-[.6rem] sm:mr-1.5 sm:text-green-600" />
 							<div class="text-green-600 max-sm:hidden">Link copied to clipboard</div>
 						{:else}
-							<CarbonExport class="text-[.6rem] sm:mr-1.5 sm:text-primary-500" />
+							<CarbonExport class="sm:text-primary-500 text-[.6rem] sm:mr-1.5" />
 							<div class="max-sm:hidden">Share this conversation</div>
 						{/if}
 					</button>

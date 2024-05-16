@@ -23,6 +23,4 @@ export interface Conversation extends Timestamps {
 
 	preprompt?: string;
 	assistantId?: Assistant["_id"];
-
-	userAgent?: string;
 }

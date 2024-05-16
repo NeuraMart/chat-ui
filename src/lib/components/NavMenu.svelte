@@ -10,6 +10,13 @@
 	import type { ConvSidebar } from "$lib/types/ConvSidebar";
 	import type { Model } from "$lib/types/Model";
 	import { page } from "$app/stores";
+	import CarbonMoon from "~icons/carbon/moon";
+	import CarbonSettings from "~icons/carbon/settings";
+	import CarbonAdd from "~icons/carbon/add";
+	import CarbonLogin from "~icons/carbon/login";
+	import CarbonBot from "~icons/carbon/bot";
+	import { useSettingsStore } from "$lib/stores/settings";
+	import { goto } from "$app/navigation";
 
 	export let conversations: ConvSidebar[] = [];
 	export let canLogin: boolean;
@@ -44,23 +51,36 @@
 	} as const;
 
 	const nModels: number = $page.data.models.filter((el: Model) => !el.unlisted).length;
+
+	const settings = useSettingsStore();
+	// console.log(settings);
+	const url: string = "/settings/" + $settings.activeModel;
+	// console.log(base);
+	// console.log(url);
 </script>
 
-<div class="sticky top-0 flex flex-none items-center justify-between px-3 py-3.5 max-sm:pt-0">
-	<a class="flex items-center rounded-xl text-lg font-semibold" href="{PUBLIC_ORIGIN}{base}/">
+<div
+	class="sticky top-0 mb-0 flex flex-col items-center justify-between rounded-t-xl from-gray-50 px-3 py-3.5 max-sm:bg-gradient-to-t max-sm:pt-0 md:bg-gradient-to-l dark:from-gray-800/30"
+>
+	<a
+		class="flex items-center rounded-xl pb-4 pt-2 text-lg font-semibold"
+		href="{PUBLIC_ORIGIN}{base}/"
+	>
 		<Logo classNames="mr-1" />
-		{PUBLIC_APP_NAME}
+		{"Neuramart"}
 	</a>
+	<p class="mb-6 h-px w-full bg-white" />
 	<a
 		href={`${base}/`}
 		on:click={handleNewChatClick}
-		class="flex rounded-lg border bg-white px-2 py-0.5 text-center shadow-sm hover:shadow-none dark:border-gray-600 dark:bg-gray-700"
+		class="flex h-10 items-center self-start rounded-3xl border bg-white px-2 py-0.5 text-center shadow-sm hover:shadow-none dark:border-gray-600 dark:bg-gray-700"
 	>
-		New Chat
+		<CarbonAdd style="font-size: 22px" />
+		<span class="my-2 ml-4 mr-2 w-20 text-left font-normal"> New Chat </span>
 	</a>
 </div>
 <div
-	class="scrollbar-custom flex flex-col gap-1 overflow-y-auto rounded-r-xl from-gray-50 px-3 pb-3 pt-2 max-sm:bg-gradient-to-t md:bg-gradient-to-l dark:from-gray-800/30"
+	class="scrollbar-custom flex flex-col gap-1 overflow-y-auto rounded-b-xl from-gray-50 px-3 pb-3 pt-2 max-sm:bg-gradient-to-t md:bg-gradient-to-l dark:from-gray-800/30"
 >
 	{#each Object.entries(groupedConversations) as [group, convs]}
 		{#if convs.length}
@@ -94,35 +114,35 @@
 			</button>
 		</form>
 	{/if}
-	{#if canLogin}
-		<form action="{base}/login" method="POST" target="_parent">
-			<button
-				type="submit"
-				class="flex h-9 w-full flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-			>
-				Login
-			</button>
-		</form>
-	{/if}
+
+	<form action="{base}/login" method="POST" target="_parent">
+		<button
+			type="submit"
+			class="flex h-9 w-full flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+		>
+			<CarbonLogin style="font-size: 13px" /> Login
+		</button>
+	</form>
+
 	<button
 		on:click={switchTheme}
 		type="button"
 		class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 	>
-		Theme
+		<CarbonMoon style="font-size: 13px" /> Theme
 	</button>
-	{#if nModels > 1}
-		<a
-			href="{base}/models"
-			class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+
+	<!-- <a
+		href="{base}/models"
+		class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+	>
+		<CarbonBot style="font-size: 13px" />Models
+		<span
+			class="ml-auto rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-500 dark:border-gray-500 dark:text-gray-400"
+			>{nModels}</span
 		>
-			Models
-			<span
-				class="ml-auto rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-500 dark:border-gray-500 dark:text-gray-400"
-				>{nModels}</span
-			>
-		</a>
-	{/if}
+	</a> -->
+
 	{#if $page.data.enableAssistants}
 		<a
 			href="{base}/assistants"
@@ -137,10 +157,11 @@
 	{/if}
 
 	<a
-		href="{base}/settings"
+		href="/"
+		on:click|preventDefault={() => goto(url)}
 		class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 	>
-		Settings
+		<CarbonSettings style="font-size: 13px" />Settings
 	</a>
 	{#if PUBLIC_APP_NAME === "HuggingChat"}
 		<a
