@@ -19,4 +19,7 @@ export type Message = Partial<Timestamps> & {
 
 	// goes one level deep
 	children?: Message["id"][];
+
+	//repliedMessage
+	repliedOnMessage?: Message["id"];
 };

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isDesktop } from "$lib/utils/isDesktop";
 	import { createEventDispatcher, onMount } from "svelte";
+	import { repliedOnMessage } from "$lib/stores/repliedOnMessage";
+	import type { Message } from "$lib/types/Message";
 
 	export let value = "";
 	export let minRows = 1;
@@ -10,6 +12,12 @@
 
 	let textareaElement: HTMLTextAreaElement;
 	let isCompositionOn = false;
+
+	let messageReplied: Message | undefined;
+
+	repliedOnMessage.subscribe((val: Message | undefined) => {
+		messageReplied = val;
+	});
 
 	const dispatch = createEventDispatcher<{ submit: void }>();
 
@@ -37,27 +45,35 @@
 	});
 </script>
 
-<div class="relative min-w-0 flex-1">
-	<pre
-		class="scrollbar-custom invisible overflow-x-hidden overflow-y-scroll whitespace-pre-wrap break-words p-3"
-		aria-hidden="true"
-		style="min-height: {minHeight}; max-height: {maxHeight}">{(value || " ") + "\n"}</pre>
-
-	<textarea
-		enterkeyhint="send"
-		tabindex="0"
-		rows="1"
-		class="scrollbar-custom absolute top-0 m-0 h-full w-full resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-0 bg-transparent p-3 outline-none focus:ring-0 focus-visible:ring-0"
-		class:text-gray-400={disabled}
-		bind:value
-		bind:this={textareaElement}
-		{disabled}
-		on:keydown={handleKeydown}
-		on:compositionstart={() => (isCompositionOn = true)}
-		on:compositionend={() => (isCompositionOn = false)}
-		on:beforeinput
-		{placeholder}
-	/>
+<div class="relative flex w-full flex-col">
+	{#if messageReplied}
+		<div
+			class="relative flex min-h-[calc(2rem+theme(spacing[3.5])*2)] w-full min-w-[60px] items-center break-words rounded-xl border border-s-8 border-gray-200 bg-gradient-to-br from-gray-50 px-5 text-gray-600 prose-pre:my-2 dark:border-gray-900 dark:bg-gray-800 dark:from-gray-800/40 dark:text-gray-200"
+		>
+			<p>{messageReplied.content.trim()}</p>
+		</div>
+	{/if}
+	<div class="relative flex min-w-0 flex-1">
+		<pre
+			class="scrollbar-custom invisible overflow-x-hidden overflow-y-scroll whitespace-pre-wrap break-words p-3"
+			aria-hidden="true"
+			style="min-height: {minHeight}; max-height: {maxHeight}">{(value || " ") + "\n"}</pre>
+		<textarea
+			enterkeyhint="send"
+			tabindex="0"
+			rows="1"
+			class="scrollbar-custom absolute top-0 m-0 h-full w-full resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-0 bg-transparent p-3 outline-none focus:ring-0 focus-visible:ring-0"
+			class:text-gray-400={disabled}
+			bind:value
+			bind:this={textareaElement}
+			{disabled}
+			on:keydown={handleKeydown}
+			on:compositionstart={() => (isCompositionOn = true)}
+			on:compositionend={() => (isCompositionOn = false)}
+			on:beforeinput
+			{placeholder}
+		/>
+	</div>
 </div>
 
 <style>

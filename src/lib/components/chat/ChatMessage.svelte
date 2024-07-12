@@ -5,6 +5,7 @@
 	import { afterUpdate, createEventDispatcher, tick } from "svelte";
 	import { deepestChild } from "$lib/utils/deepestChild";
 	import { page } from "$app/stores";
+	import { repliedOnMessage } from "$lib/stores/repliedOnMessage";
 
 	import CodeBlock from "../CodeBlock.svelte";
 	import CopyToClipBoardBtn from "../CopyToClipBoardBtn.svelte";
@@ -17,12 +18,13 @@
 	import CarbonChevronLeft from "~icons/carbon/chevron-left";
 	import CarbonChevronRight from "~icons/carbon/chevron-right";
 
+	import CarbonReply from "~icons/carbon/reply";
 	import { PUBLIC_SEP_TOKEN } from "$lib/constants/publicSepToken";
 	import type { Model } from "$lib/types/Model";
 
 	import OpenWebSearchResults from "../OpenWebSearchResults.svelte";
 	import type { WebSearchUpdate } from "$lib/types/MessageUpdate";
-	import { base } from "$app/paths";
+
 	import { useConvTreeStore } from "$lib/stores/convTree";
 
 	function sanitizeMd(md: string) {
@@ -176,73 +178,72 @@
 </script>
 
 {#if message.from === "assistant"}
-	<div
-		class="leading-1.5 ml-2 flex w-fit max-w-[750px] flex-col rounded-e-xl rounded-es-xl border-gray-200 bg-gray-100 px-4 pb-4 pt-0 text-base dark:bg-gray-700"
-		role="presentation"
-		on:click={() => (isTapped = !isTapped)}
-		on:keydown={() => (isTapped = !isTapped)}
-	>
+	<div class="flex">
 		<div
-			class="left relative -left-8 top-0 -z-10 h-0 w-0 rounded border-l-[20px] border-r-[20px] border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-700"
-		/>
-		<!-- arrow -->
-
-		<div
-			class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300"
+			class="leading-1.5 ml-2 flex flex w-fit max-w-[750px] rounded-e-xl rounded-es-xl border-gray-200 bg-gray-100 px-4 pb-4 pt-0 text-base dark:bg-gray-500"
+			role="presentation"
+			on:click={() => (isTapped = !isTapped)}
+			on:keydown={() => (isTapped = !isTapped)}
 		>
-			{#if searchUpdates && searchUpdates.length > 0}
-				<OpenWebSearchResults
-					classNames={tokens.length ? "mb-3.5" : ""}
-					webSearchMessages={searchUpdates}
-				/>
-			{/if}
-
 			<div
-				class="prose max-w-none max-sm:prose-sm dark:prose-invert prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
-				bind:this={contentEl}
-			>
-				{#each tokens as token}
-					{#if token.type === "code"}
-						<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
-					{:else}
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						{@html marked.parse(token.raw, options)}
-					{/if}
-				{/each}
-			</div>
+				class="left relative -left-8 top-0 -z-10 h-0 w-0 rounded border-l-[20px] border-r-[20px] border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-500"
+			/>
+			<!-- arrow -->
 
-			<!-- Web Search sources -->
-			{#if webSearchSources?.length}
-				<div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
-					<div class="text-gray-400">Sources:</div>
-					{#each webSearchSources as { link, title, hostname }}
-						<a
-							class="flex items-center gap-2 whitespace-nowrap rounded-lg border bg-white px-2 py-1.5 leading-none hover:border-gray-300 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
-							href={link}
-							target="_blank"
-						>
-							<img
-								class="h-3.5 w-3.5 rounded"
-								src="https://www.google.com/s2/favicons?sz=64&domain_url={hostname}"
-								alt="{title} favicon"
-							/>
-							<div>{hostname.replace(/^www\./, "")}</div>
-						</a>
+			<div>
+				<!-- class="relative mt-2 min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 pt-4 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:text-gray-300" -->
+
+				{#if searchUpdates && searchUpdates.length > 0}
+					<OpenWebSearchResults
+						classNames={tokens.length ? "mb-3.5" : ""}
+						webSearchMessages={searchUpdates}
+					/>
+				{/if}
+
+				<div
+					class="prose max-w-none dark:prose-invert max-sm:prose-sm prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
+					bind:this={contentEl}
+				>
+					{#each tokens as token}
+						{#if token.type === "code"}
+							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+						{:else}
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html marked.parse(token.raw, options)}
+						{/if}
 					{/each}
 				</div>
-			{/if}
+
+				<!-- Web Search sources -->
+				{#if webSearchSources?.length}
+					<div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
+						<div class="text-gray-400">Sources:</div>
+						{#each webSearchSources as { link, title, hostname }}
+							<a
+								class="flex items-center gap-2 whitespace-nowrap rounded-lg border bg-white px-2 py-1.5 leading-none hover:border-gray-300 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+								href={link}
+								target="_blank"
+							>
+								<img
+									class="h-3.5 w-3.5 rounded"
+									src="https://www.google.com/s2/favicons?sz=64&domain_url={hostname}"
+									alt="{title} favicon"
+								/>
+								<div>{hostname.replace(/^www\./, "")}</div>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		</div>
-		{#if !loading && message.content}
+		{#if true}
 			<div
-				class="absolute bottom-1 right-0 -mb-4 flex max-md:transition-all md:bottom-0 md:group-hover:visible md:group-hover:opacity-100
-		{message.score ? 'visible opacity-100' : 'invisible max-md:-translate-y-4 max-md:opacity-0'}
-		{isTapped || isCopied ? 'max-md:visible max-md:translate-y-0 max-md:opacity-100' : ''}
-		"
+				class="visible relative -right-2 -mb-4 flex flex items-center gap-2 px-2 opacity-100 max-md:-translate-y-4 max-md:opacity-100 max-md:transition-all md:bottom-0"
 			>
 				{#if isAuthor}
 					<button
-						class="btn rounded-sm p-1 text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300
-					{message.score && message.score > 0
+						class="btn rounded-sm text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300
+				{message.score && message.score > 0
 							? 'text-green-500 hover:text-green-500 dark:text-green-400 hover:dark:text-green-400'
 							: ''}"
 						title={message.score === 1 ? "Remove +1" : "+1"}
@@ -253,8 +254,8 @@
 						<CarbonThumbsUp class="h-[1.14em] w-[1.14em]" />
 					</button>
 					<button
-						class="btn rounded-sm p-1 text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300
-					{message.score && message.score < 0
+						class="btn rounded-sm text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300
+				{message.score && message.score < 0
 							? 'text-red-500 hover:text-red-500 dark:text-red-400 hover:dark:text-red-400'
 							: ''}"
 						title={message.score === -1 ? "Remove -1" : "-1"}
@@ -266,7 +267,7 @@
 					</button>
 				{/if}
 				<button
-					class="btn rounded-sm p-1 text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+					class="btn rounded-sm text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-100"
 					title="Retry"
 					type="button"
 					on:click={() => dispatch("retry", { id: message.id })}
@@ -277,139 +278,166 @@
 					on:click={() => {
 						isCopied = true;
 					}}
-					classNames="ml-1.5 !rounded-sm !p-1 !text-sm !text-gray-400 focus:!ring-0 hover:!text-gray-500 dark:!text-gray-400 dark:hover:!text-gray-300 !border-none !shadow-none"
+					classNames=" !rounded-sm !p-1 !text-sm !text-gray-400 focus:!ring-0 hover:!text-gray-500 dark:!text-gray-400 dark:hover:!text-gray-300 !border-none !shadow-none"
 					value={message.content}
 				/>
+				<button
+					class="btn text-gray rounded-sm text-sm focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+					title="Reply"
+					type="button"
+					on:click={() => repliedOnMessage.set(message)}
+				>
+					<CarbonReply />
+				</button>
 			</div>
 		{/if}
 	</div>
 	<slot name="childrenNav" />
 {/if}
 {#if message.from === "user"}
-	<div
-		class="leading-1.5 ml-2 flex w-fit max-w-[750px] flex-col self-end rounded-bl-xl rounded-br-xl rounded-tl-xl border-gray-200 bg-gray-100 pb-4 pl-4 pr-4 pt-0 text-base dark:bg-gray-700"
-		role="presentation"
-		on:click={() => (isTapped = !isTapped)}
-		on:keydown={() => (isTapped = !isTapped)}
-	>
-		<div
-			class="left relative -right-[87px] top-0 -z-10 h-0
-  w-0 rounded
-  border-l-[20px] border-r-[20px]
-  border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-700"
-		/>
-		<!-- arrow -->
-		<div
-			class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300"
-		>
-			{#if message.files && message.files.length > 0}
-				<div class="mx-auto grid w-fit grid-cols-2 gap-5 px-5">
-					{#each message.files as file}
-						<!-- handle the case where this is a hash that points to an image in the db, hash is always 64 char long -->
-						{#if file.length === 64}
-							<img
-								src={$page.url.pathname + "/output/" + file}
-								alt="input from user"
-								class="my-2 aspect-auto max-h-48 rounded-lg shadow-lg"
-							/>
-						{:else}
-							<!-- handle the case where this is a base64 encoded image -->
-							<img
-								src={"data:image/*;base64," + file}
-								alt="input from user"
-								class="my-2 aspect-auto max-h-48 rounded-lg shadow-lg"
-							/>
-						{/if}
-					{/each}
-				</div>
-			{/if}
-
+	<div class="flex flex-row-reverse items-center self-end">
+		<div class="flex flex-col self-end">
 			<div
-				class="prose max-w-none max-sm:prose-sm dark:prose-invert prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
+				class="left relative -right-20 top-[20px] -z-10 h-0
+w-0 rounded
+border-l-[20px] border-r-[20px]
+border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-500"
+			/>
+			<!-- arrow -->
+			<div
+				class="leading-1.5 ml-2 flex w-fit min-w-[100px] max-w-[750px] flex-col items-center justify-center self-end rounded-bl-2xl rounded-br-2xl rounded-tl-2xl border-gray-200 bg-gray-100 px-1 py-1 text-base dark:bg-gray-500"
+				role="presentation"
+				on:click={() => (isTapped = !isTapped)}
+				on:keydown={() => (isTapped = !isTapped)}
 			>
-				{#if !editMode}
-					<p
-						class="disabled m-0 w-full appearance-none whitespace-break-spaces text-wrap break-words bg-inherit p-0 text-gray-500 dark:text-gray-400"
+				{#if message.repliedOnMessage}
+					<div
+						class="relative flex min-h-[calc(2rem+theme(spacing[3.5])*2)] w-full min-w-[60px] items-center break-words rounded-2xl border border-s-8 border-gray-100 bg-gradient-to-br from-gray-50 px-5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300"
 					>
-						{message.content.trim()}
-					</p>
-				{:else}
-					<form
-						class="flex w-full flex-col"
-						bind:this={editFormEl}
-						on:submit|preventDefault={() => {
-							dispatch("retry", { content: editContentEl.value, id: message.id });
-							$convTreeStore.editing = null;
-						}}
+						message.repliedOnMessage.content.trim()
+					</div>
+				{/if}
+				<div class="py-1">
+					<!-- class="relative mt-2 min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300" -->
+
+					{#if message.files && message.files.length > 0}
+						<div class="mx-auto grid w-fit grid-cols-2 gap-5 px-5">
+							{#each message.files as file}
+								<!-- handle the case where this is a hash that points to an image in the db, hash is always 64 char long -->
+								{#if file.length === 64}
+									<img
+										src={$page.url.pathname + "/output/" + file}
+										alt="input from user"
+										class="my-2 aspect-auto max-h-48 rounded-lg shadow-lg"
+									/>
+								{:else}
+									<!-- handle the case where this is a base64 encoded image -->
+									<img
+										src={"data:image/*;base64," + file}
+										alt="input from user"
+										class="my-2 aspect-auto max-h-48 rounded-lg shadow-lg"
+									/>
+								{/if}
+							{/each}
+						</div>
+					{/if}
+
+					<div
+						class="prose max-w-none dark:prose-invert max-sm:prose-sm prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
 					>
-						<textarea
-							class="w-full whitespace-break-spaces break-words rounded-lg bg-gray-100 px-5 py-3.5 text-gray-500 *:h-max dark:bg-gray-800 dark:text-gray-400"
-							bind:this={editContentEl}
-							value={message.content.trim()}
-							on:keydown={handleKeyDown}
-							required
-						/>
-						<div class="flex w-full flex-row flex-nowrap items-center justify-center gap-2 pt-2">
-							<button
-								type="submit"
-								class="btn rounded-lg px-3 py-1.5 text-sm
-								{loading
-									? 'bg-gray-300 text-gray-400 dark:bg-gray-700 dark:text-gray-600'
-									: 'bg-gray-200 text-gray-600 focus:ring-0   hover:text-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-gray-200'}
-								"
-								disabled={loading}
+						{#if !editMode}
+							<p
+								class="disabled m-0 w-full appearance-none whitespace-break-spaces text-wrap break-words bg-inherit p-0 text-gray-900 dark:text-gray-100"
 							>
-								Submit
-							</button>
-							<button
-								type="button"
-								class="btn rounded-sm p-2 text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
-								on:click={() => {
+								{message.content.trim()}
+							</p>
+						{:else}
+							<form
+								class="flex w-full flex-col"
+								bind:this={editFormEl}
+								on:submit|preventDefault={() => {
+									dispatch("retry", { content: editContentEl.value, id: message.id });
 									$convTreeStore.editing = null;
 								}}
 							>
-								Cancel
-							</button>
-						</div>
-					</form>
-				{/if}
-				{#if !loading && !editMode}
-					<div
-						class="
-						max-md:opacity-0' invisible absolute
-						right-0 top-3.5 z-10 h-max max-md:-translate-y-4 max-md:transition-all md:bottom-0 md:group-hover:visible md:group-hover:opacity-100 {isTapped ||
-						isCopied
-							? 'max-md:visible max-md:translate-y-0 max-md:opacity-100'
-							: ''}"
-					>
-						<div class="mx-auto flex flex-row flex-nowrap gap-2">
-							{#if downloadLink}
-								<a
-									class="rounded-lg border border-gray-100 bg-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 max-sm:!hidden md:hidden dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
-									title="Download prompt and parameters"
-									type="button"
-									target="_blank"
-									href={downloadLink}
+								<textarea
+									class="w-full whitespace-break-spaces break-words rounded-lg bg-gray-100 px-5 py-3.5 text-gray-500 *:h-max dark:bg-gray-800 dark:text-gray-400"
+									bind:this={editContentEl}
+									value={message.content.trim()}
+									on:keydown={handleKeyDown}
+									required
+								/>
+								<div
+									class="flex w-full flex-row flex-nowrap items-center justify-center gap-2 pt-2"
 								>
-									<CarbonDownload />
-								</a>
-							{/if}
-							{#if !readOnly}
-								<button
-									class="cursor-pointer rounded-lg border border-gray-100 bg-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 md:hidden lg:-right-2 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
-									title="Branch"
-									type="button"
-									on:click={() => ($convTreeStore.editing = message.id)}
-								>
-									<CarbonPen />
-								</button>
-							{/if}
-						</div>
+									<button
+										type="submit"
+										class="btn rounded-lg px-3 py-1.5 text-sm
+								{loading
+											? 'bg-gray-300 text-gray-400 dark:bg-gray-700 dark:text-gray-600'
+											: 'bg-gray-200 text-gray-600 focus:ring-0   hover:text-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-gray-200'}
+								"
+										disabled={loading}
+									>
+										Submit
+									</button>
+									<button
+										type="button"
+										class="btn rounded-sm p-2 text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+										on:click={() => {
+											$convTreeStore.editing = null;
+										}}
+									>
+										Cancel
+									</button>
+								</div>
+							</form>
+						{/if}
 					</div>
-				{/if}
+				</div>
 			</div>
-			<slot name="childrenNav" />
 		</div>
+		<slot name="childrenNav" />
+		{#if !loading}
+			<div
+				class="
+						 relative
+						right-0 top-3.5 z-10 h-max max-md:visible max-md:-translate-y-4 max-md:translate-y-0 max-md:opacity-100 max-md:transition-all
+							md:bottom-0 md:group-hover:visible md:group-hover:opacity-100"
+			>
+				<div class="mx-auto flex flex-row flex-nowrap gap-2">
+					{#if downloadLink}
+						<a
+							class="rounded-lg border border-gray-100 bg-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300 max-sm:!hidden md:hidden"
+							title="Download prompt and parameters"
+							type="button"
+							target="_blank"
+							href={downloadLink}
+						>
+							<CarbonDownload />
+						</a>
+					{/if}
+					{#if !readOnly}
+						<button
+							class="cursor-pointer rounded-lg border border-gray-100 bg-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300 md:hidden lg:-right-2"
+							title="Branch"
+							type="button"
+							on:click={() => ($convTreeStore.editing = message.id)}
+						>
+							<CarbonPen />
+						</button>
+					{/if}
+					<button
+						class="btn rounded-sm p-1 text-sm text-gray-400 focus:ring-0 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+						title="Reply"
+						type="button"
+						on:click={() => repliedOnMessage.set(message)}
+					>
+						<CarbonReply />
+					</button>
+				</div>
+			</div>
+		{/if}
 	</div>
 {/if}
 

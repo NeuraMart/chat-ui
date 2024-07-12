@@ -128,6 +128,7 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 				model: conv.model ?? defaultModel,
 				updatedAt: conv.updatedAt,
 				assistantId: conv.assistantId?.toString(),
+				groupName: "Trial Group",
 				avatarHash:
 					conv.assistantId &&
 					assistants.find((a) => a._id.toString() === conv.assistantId?.toString())?.avatar,

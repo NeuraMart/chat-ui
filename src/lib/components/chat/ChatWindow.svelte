@@ -38,6 +38,7 @@
 	import * as Select from "$lib/components/ui/select/index.js";
 	import * as Avatar from "$lib/components/ui/avatar/index.js";
 	import { useSettingsStore } from "$lib/stores/settings";
+	import { repliedOnMessage } from "$lib/stores/repliedOnMessage";
 
 	export let messages: Message[] = [];
 	export let loading = false;
@@ -60,6 +61,7 @@
 
 	const dispatch = createEventDispatcher<{
 		message: string;
+		repliedMessage: string | undefined;
 		share: void;
 		stop: void;
 		retry: { id: Message["id"]; content?: string };
@@ -69,6 +71,7 @@
 	const handleSubmit = () => {
 		if (loading) return;
 		dispatch("message", message);
+		dispatch("repliedMessage", messageReplied?.content);
 		message = "";
 	};
 
@@ -138,45 +141,50 @@
 	let isFocused = false;
 	// if (messages.length > 0) console.log("Clicked");
 	// If messages array length changes we will use transition
+	let messageReplied: Message | undefined;
+	repliedOnMessage.subscribe((val) => {
+		messageReplied = val;
+	});
 </script>
 
 <div class=" relative min-h-0 min-w-0">
 	<div
 		class="flex-no-wrap fixed relative top-0 mx-0 mb-1 mt-1.5 flex w-full justify-between px-4 py-0 lg:flex-wrap lg:py-4"
 	>
-		<Select.Root
-			onSelectedChange={(v) => {
-				v && ($settings.activeModel = v.value);
-			}}
-		>
-			<Select.Trigger class="w-[180px]">
-				<Select.Value placeholder={$settings.activeModel} />
-			</Select.Trigger>
-			<Select.Content>
-				<Select.Group>
-					{#each availableModels as model}
-						<Select.Item value={model.value} label={model.label}>{model.label}</Select.Item>
-					{/each}
-				</Select.Group>
-			</Select.Content>
-			<Select.Input name="favoriteModel" />
-		</Select.Root>
+		<div class="flex-0 flex justify-between gap-5">
+			<Select.Root
+				onSelectedChange={(v) => {
+					v && ($settings.activeModel = v.value);
+				}}
+			>
+				<Select.Trigger class="min-h-12 border-s-8 dark:border-gray-500">
+					<Select.Value placeholder={$settings.activeModel} />
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Group>
+						{#each availableModels as model}
+							<Select.Item value={model.value} label={model.label}>{model.label}</Select.Item>
+						{/each}
+					</Select.Group>
+				</Select.Content>
+				<Select.Input name="favoriteModel" />
+			</Select.Root>
 
-		<Tooltip.Root>
-			<Tooltip.Trigger class="min-h-[15px] {isFocused ? 'w-1/2' : 'w-1/4'}">
-				<Textarea
-					class="resize-none bg-gray-100 dark:bg-gray-800"
-					placeholder="Enter system prompt"
-					on:focus={() => (isFocused = true)}
-					on:blur={() => (isFocused = false)}
-					bind:value={$settings.customPrompts[$settings.activeModel]}
-				/>
-			</Tooltip.Trigger>
-			<Tooltip.Content>
-				<p>This is your system prompt</p>
-			</Tooltip.Content>
-		</Tooltip.Root>
-
+			<Tooltip.Root>
+				<Tooltip.Trigger class="min-h-[15px]">
+					<Textarea
+						class="border-lg min-h-12 min-w-64 resize-none rounded-lg border-2 bg-gray-100 transition-all duration-200 focus:w-max dark:border-gray-600 dark:bg-gray-800"
+						placeholder="Enter system prompt"
+						on:focus={() => (isFocused = true)}
+						on:blur={() => (isFocused = false)}
+						bind:value={$settings.customPrompts[$settings.activeModel]}
+					/>
+				</Tooltip.Trigger>
+				<Tooltip.Content>
+					<p>This is your system prompt</p>
+				</Tooltip.Content>
+			</Tooltip.Root>
+		</div>
 		<Avatar.Root>
 			<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
 			<Avatar.Fallback>CN</Avatar.Fallback>
@@ -284,7 +292,7 @@
 		/>
 	</div>
 	<div
-		class="dark:via-gray-80 pointer-events-none absolute inset-x-0 bottom-0 z-0 mx-auto flex w-full max-w-3xl flex-col items-center justify-center bg-gradient-to-t from-white via-white/80 to-white/0 px-3.5 py-4 max-md:border-t max-md:bg-white sm:px-5 md:py-8 xl:max-w-4xl dark:border-gray-800 dark:from-gray-900 dark:to-gray-900/0 max-md:dark:bg-gray-900 [&>*]:pointer-events-auto"
+		class="dark:via-gray-80 pointer-events-none absolute inset-x-0 bottom-0 z-0 mx-auto flex w-full max-w-3xl flex-col items-center justify-center bg-gradient-to-t from-white via-white/80 to-white/0 px-3.5 py-4 dark:border-gray-800 dark:from-gray-900 dark:to-gray-900/0 max-md:border-t max-md:bg-white max-md:dark:bg-gray-900 sm:px-5 md:py-8 xl:max-w-4xl [&>*]:pointer-events-auto"
 	>
 		{#if sources.length}
 			<div class="flex flex-row flex-wrap justify-center gap-2.5 max-md:pb-3">
@@ -303,7 +311,7 @@
 									files = files.filter((_, i) => i !== index);
 								}}
 							>
-								<CarbonClose class="text-md font-black text-gray-300  hover:text-gray-100" />
+								<CarbonClose class="text-md font-gray text-gray-300  hover:text-gray-100" />
 							</button>
 						</div>
 					{/await}
@@ -382,24 +390,34 @@
 
 						{#if loading}
 							<button
-								class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 md:hidden dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+								class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:hidden"
 								on:click={() => dispatch("stop")}
 							>
 								<CarbonStopFilledAlt />
 							</button>
 							<div
-								class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 md:flex dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+								class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:flex"
 							>
 								<EosIconsLoading />
 							</div>
 						{:else}
-							<button
-								class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
-								disabled={!message || isReadOnly}
-								type="submit"
-							>
-								<CarbonSendAltFilled />
-							</button>
+							<div class="flex flex-col justify-center">
+								{#if messageReplied}
+									<button
+										class="btn my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+										on:click={() => repliedOnMessage.set(undefined)}
+									>
+										<CarbonClose style="font-size: 22px " />
+									</button>
+								{/if}
+								<button
+									class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+									disabled={!message || isReadOnly}
+									type="submit"
+								>
+									<CarbonSendAltFilled />
+								</button>
+							</div>
 						{/if}
 					</div>
 				{/if}
