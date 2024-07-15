@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Message } from "$lib/types/Message";
-	import { createEventDispatcher, onDestroy, tick } from "svelte";
+	import { afterUpdate, createEventDispatcher, onDestroy, tick } from "svelte";
 
 	import CarbonSendAltFilled from "~icons/carbon/send-alt-filled";
 	import CarbonExport from "~icons/carbon/export";
@@ -57,7 +57,15 @@
 	let message: string;
 	let timeout: ReturnType<typeof setTimeout>;
 	let isSharedRecently = false;
+	let messageReplied: Message | undefined;
+
+	$: numOfMessages = messages.length;
+
 	$: $page.params.id && (isSharedRecently = false);
+
+	$: if (numOfMessages) {
+		scrollToBottom();
+	}
 
 	const dispatch = createEventDispatcher<{
 		message: string;
@@ -73,6 +81,7 @@
 		dispatch("message", message);
 		dispatch("repliedMessage", messageReplied?.content);
 		message = "";
+		messageReplied = undefined;
 	};
 
 	let lastTarget: EventTarget | null = null;
@@ -124,7 +133,8 @@
 
 	async function scrollToBottom() {
 		await tick();
-		chatContainer.scrollTop = chatContainer.scrollHeight;
+		if (chatContainer)
+			chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
 	}
 
 	// If last message is from user, scroll to bottom
@@ -141,7 +151,6 @@
 	let isFocused = false;
 	// if (messages.length > 0) console.log("Clicked");
 	// If messages array length changes we will use transition
-	let messageReplied: Message | undefined;
 	repliedOnMessage.subscribe((val) => {
 		messageReplied = val;
 	});
@@ -202,7 +211,7 @@
 		use:snapScrollToBottom={messages.length ? [...messages] : false}
 		bind:this={chatContainer}
 	>
-		<div class="mx-auto flex h-full max-w-3xl flex-col gap-6 px-5 pt-6 sm:gap-8 xl:max-w-4xl">
+		<div class="mx-auto flex h-full max-w-4xl flex-col gap-6 px-5 pt-6 sm:gap-8 xl:max-w-6xl">
 			{#if $page.data?.assistant}
 				<a
 					class="mx-auto flex items-center gap-1.5 rounded-full border border-gray-100 bg-gray-50 py-1 pl-1 pr-3 text-sm text-gray-800 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -230,7 +239,7 @@
 			{/if}
 
 			{#if messages.length > 0}
-				<div class="flex h-max flex-col gap-6 pb-52">
+				<div class="flex h-max flex-col gap-6 pb-64">
 					<ChatMessage
 						{loading}
 						{messages}
@@ -371,7 +380,11 @@
 				{:else}
 					<div class="flex w-full flex-1 border-none bg-transparent">
 						{#if lastIsError}
-							<ChatInput value="Sorry, something went wrong. Please try again." disabled={true} />
+							<ChatInput
+								value="Sorry, something went wrong. Please try again."
+								disabled={true}
+								{messageReplied}
+							/>
 						{:else}
 							<ChatInput
 								placeholder="Ask anything"
@@ -383,6 +396,7 @@
 										loginModalOpen = true;
 									}
 								}}
+								{messageReplied}
 								maxRows={6}
 								disabled={isReadOnly || lastIsError}
 							/>

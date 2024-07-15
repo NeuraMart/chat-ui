@@ -91,7 +91,7 @@
 
 	const settings = useSettingsStore();
 	// console.log(settings);
-	const url: string = "/settings/" + $settings.activeModel;
+	const url: string = "/chat/settings/" + $settings.activeModel;
 </script>
 
 <div

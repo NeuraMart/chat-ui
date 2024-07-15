@@ -31,18 +31,18 @@
 
 <div class="flex flex-col items-start">
 	<div class="mb-5 flex flex-col gap-1.5">
-		<h2 class="text-lg font-semibold md:text-xl">
+		<h2 class="text-lg font-semibold dark:text-gray-100 md:text-xl">
 			{$page.params.model}
 		</h2>
 
 		{#if model.description}
-			<p class="whitespace-pre-wrap text-gray-600">
+			<p class="whitespace-pre-wrap text-gray-600 dark:text-gray-500">
 				{model.description}
 			</p>
 		{/if}
 	</div>
 
-	<div class="flex flex-wrap items-center gap-2 md:gap-4">
+	<div class="flex flex-wrap items-center gap-2 dark:text-gray-400 md:gap-4">
 		{#if model.modelUrl}
 			<a
 				href={model.modelUrl || "https://huggingface.co/" + model.name}
@@ -91,7 +91,7 @@
 	<button
 		class="{isActive
 			? 'bg-gray-100'
-			: 'bg-black text-white'} my-8 flex items-center rounded-full px-3 py-1"
+			: 'bg-black text-white'} my-8 flex items-center rounded-full px-3 py-1 dark:bg-blue-800 dark:text-sky-300"
 		disabled={isActive}
 		name="Activate model"
 		on:click|stopPropagation={() => {
@@ -103,10 +103,10 @@
 
 	<div class="flex w-full flex-col gap-2">
 		<div class="flex w-full flex-row content-between">
-			<h3 class="mb-1.5 text-lg font-semibold text-gray-800">System Prompt</h3>
+			<h3 class="mb-1.5 text-lg font-semibold text-gray-800 dark:text-gray-200">System Prompt</h3>
 			{#if hasCustomPreprompt}
 				<button
-					class="ml-auto underline decoration-gray-300 hover:decoration-gray-700"
+					class="ml-auto text-gray-900 focus:ring hover:text-gray-200 dark:text-sky-700"
 					on:click|stopPropagation={() =>
 						($settings.customPrompts[$page.params.model] = model.preprompt)}
 				>
@@ -116,7 +116,7 @@
 		</div>
 		<textarea
 			rows="10"
-			class="w-full resize-none rounded-md border-2 bg-gray-100 p-2"
+			class="w-full resize-none rounded-md border-2 bg-gray-100 p-2 dark:bg-gray-900 dark:text-white"
 			bind:value={$settings.customPrompts[$page.params.model]}
 		/>
 	</div>

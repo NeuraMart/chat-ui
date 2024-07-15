@@ -35,34 +35,36 @@
 </script>
 
 <div
-	class="grid h-full w-full grid-cols-1 grid-rows-[auto,1fr] content-start gap-x-8 overflow-hidden p-4 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
+	class="grid h-full w-full grid-cols-1 grid-rows-[auto,1fr] content-start gap-x-8 overflow-hidden border-2 p-4 dark:border-white dark:bg-black md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
 >
-	<div class="col-span-1 mb-4 flex items-center justify-between md:col-span-3">
-		<h2 class="text-xl font-bold">Settings</h2>
+	<div class="col-span-1 mb-4 flex items-center justify-between dark:bg-black md:col-span-3">
+		<h2 class="text-xl font-bold dark:text-white">Settings</h2>
 		<button
 			class="btn rounded-lg"
 			on:click={() => {
 				goto(previousPage);
 			}}
 		>
-			<CarbonClose class="text-xl text-gray-900 hover:text-black" />
+			<CarbonClose
+				class="text-xl text-gray-900 hover:text-black dark:text-white dark:hover:text-gray-200"
+			/>
 		</button>
 	</div>
 	<div
 		class="col-span-1 flex flex-col overflow-y-auto whitespace-nowrap max-md:-mx-4 max-md:h-[245px] max-md:border max-md:border-b-2 md:pr-6"
 	>
-		<h3 class="pb-3 pl-3 pt-2 text-[.8rem] text-gray-800 sm:pl-1">Models</h3>
+		<h3 class="pb-3 pl-3 pt-2 text-[.8rem] text-gray-800 dark:text-gray-200 sm:pl-1">Models</h3>
 
 		{#each data.models.filter((el) => !el.unlisted) as model}
 			<a
 				href="{base}/settings/{model.id}"
-				class="group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm text-gray-500 hover:bg-gray-100 md:rounded-xl
-					{model.id === $page.params.model ? '!bg-gray-100 !text-gray-800' : ''}"
+				class="group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm text-gray-500 transition duration-300 hover:text-gray-200 md:rounded-xl
+					{model.id === $page.params.model ? 'text-blue-700' : ''}"
 			>
 				<div class="truncate">{model.displayName}</div>
 				{#if model.id === $settings.activeModel}
 					<div
-						class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white"
+						class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white dark:bg-white dark:text-black"
 					>
 						Active
 					</div>
@@ -71,14 +73,17 @@
 		{/each}
 		<!-- if its huggingchat, the number of assistants owned by the user must be non-zero to show the UI -->
 		{#if data.enableAssistants}
-			<h3 bind:this={assistantsSection} class="pb-3 pl-3 pt-5 text-[.8rem] text-gray-800 sm:pl-1">
+			<h3
+				bind:this={assistantsSection}
+				class="pb-3 pl-3 pt-5 text-[.8rem] text-gray-800 dark:text-white sm:pl-1"
+			>
 				Assistants
 			</h3>
 			{#if !data.loginEnabled || (data.loginEnabled && !!data.user)}
 				<a
 					href="{base}/settings/assistants/new"
-					class="group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm text-gray-500 hover:bg-gray-100 md:rounded-xl
-					{$page.url.pathname === `${base}/settings/assistants/new` ? '!bg-gray-100 !text-gray-800' : ''}"
+					class="group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm text-gray-500 hover:text-gray-200 md:rounded-xl
+					{$page.url.pathname === `${base}/settings/assistants/new` ? 'text-blue' : ''}"
 				>
 					<CarbonAdd />
 					<div class="truncate">Create new assistant</div>
@@ -87,8 +92,8 @@
 			{#each data.assistants as assistant}
 				<a
 					href="{base}/settings/assistants/{assistant._id.toString()}"
-					class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm text-gray-500 hover:bg-gray-100 md:rounded-xl
-					{assistant._id.toString() === $page.params.assistantId ? '!bg-gray-100 !text-gray-800' : ''}"
+					class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm text-gray-500 hover:text-gray-100 md:rounded-xl
+					{assistant._id.toString() === $page.params.assistantId ? 'text-blue' : ''}"
 				>
 					{#if assistant.avatar}
 						<img
@@ -115,7 +120,7 @@
 			{/each}
 			<a
 				href="{base}/assistants"
-				class="group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm text-gray-500 hover:bg-gray-100 md:rounded-xl"
+				class="group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm text-gray-500 hover:text-gray-100 md:rounded-xl"
 				><CarbonArrowUpRight class="mr-1.5 shrink-0 text-xs " />
 				<div class="truncate">Browse Assistants</div>
 			</a>

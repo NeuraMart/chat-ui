@@ -180,16 +180,15 @@
 {#if message.from === "assistant"}
 	<div class="flex">
 		<div
-			class="leading-1.5 ml-2 flex flex w-fit max-w-[750px] rounded-e-xl rounded-es-xl border-gray-200 bg-gray-100 px-4 pb-4 pt-0 text-base dark:bg-gray-500"
+			class="left relative left-8 top-0 -z-10 h-0 w-0 rounded border-l-[20px] border-r-[20px] border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-500"
+		/>
+		<!-- arrow -->
+		<div
+			class="leading-1.5 ml-2 flex flex w-fit max-w-[750px] items-center rounded-e-xl rounded-es-xl border-gray-200 bg-gray-100 px-4 pb-4 pt-2 text-base dark:bg-gray-500"
 			role="presentation"
 			on:click={() => (isTapped = !isTapped)}
 			on:keydown={() => (isTapped = !isTapped)}
 		>
-			<div
-				class="left relative -left-8 top-0 -z-10 h-0 w-0 rounded border-l-[20px] border-r-[20px] border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-500"
-			/>
-			<!-- arrow -->
-
 			<div>
 				<!-- class="relative mt-2 min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 pt-4 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:text-gray-300" -->
 
@@ -201,7 +200,7 @@
 				{/if}
 
 				<div
-					class="prose max-w-none dark:prose-invert max-sm:prose-sm prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
+					class="prose dark:prose-invert max-sm:prose-sm prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
 					bind:this={contentEl}
 				>
 					{#each tokens as token}
@@ -295,29 +294,29 @@
 	<slot name="childrenNav" />
 {/if}
 {#if message.from === "user"}
-	<div class="flex flex-row-reverse items-center self-end">
-		<div class="flex flex-col self-end">
+	<div class="flex flex-row-reverse items-center justify-center self-end">
+		<div class="flex flex-row-reverse self-end">
 			<div
-				class="left relative -right-20 top-[20px] -z-10 h-0
+				class="relative -left-7
 w-0 rounded
 border-l-[20px] border-r-[20px]
 border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark:border-t-gray-500"
 			/>
 			<!-- arrow -->
 			<div
-				class="leading-1.5 ml-2 flex w-fit min-w-[100px] max-w-[750px] flex-col items-center justify-center self-end rounded-bl-2xl rounded-br-2xl rounded-tl-2xl border-gray-200 bg-gray-100 px-1 py-1 text-base dark:bg-gray-500"
+				class="leading-1.5 ml-2 flex min-w-[100px] max-w-[750px] flex-col items-center justify-center self-end rounded-bl-2xl rounded-br-2xl rounded-tl-2xl border-gray-200 bg-gray-100 px-1 py-1 text-base dark:bg-gray-500"
 				role="presentation"
 				on:click={() => (isTapped = !isTapped)}
 				on:keydown={() => (isTapped = !isTapped)}
 			>
 				{#if message.repliedOnMessage}
 					<div
-						class="relative flex min-h-[calc(2rem+theme(spacing[3.5])*2)] w-full min-w-[60px] items-center break-words rounded-2xl border border-s-8 border-gray-100 bg-gradient-to-br from-gray-50 px-5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300"
+						class="relative flex min-h-[calc(2rem+theme(spacing[3.5])*2)] w-full min-w-[60px] items-center break-words rounded-2xl border border-s-8 border-gray-100 bg-gradient-to-br from-gray-50 px-5 text-gray-900 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-black"
 					>
-						message.repliedOnMessage.content.trim()
+						<p class="text-gray-900 dark:text-black">message.repliedOnMessage.content.trim()</p>
 					</div>
 				{/if}
-				<div class="py-1">
+				<div class="px-2 py-1">
 					<!-- class="relative mt-2 min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300" -->
 
 					{#if message.files && message.files.length > 0}
@@ -343,7 +342,7 @@ border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark
 					{/if}
 
 					<div
-						class="prose max-w-none dark:prose-invert max-sm:prose-sm prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
+						class="prose dark:prose-invert max-sm:prose-sm prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
 					>
 						{#if !editMode}
 							<p
@@ -402,7 +401,7 @@ border-t-[20px] border-l-transparent border-r-transparent border-t-gray-100 dark
 			<div
 				class="
 						 relative
-						right-0 top-3.5 z-10 h-max max-md:visible max-md:-translate-y-4 max-md:translate-y-0 max-md:opacity-100 max-md:transition-all
+						right-0 z-10 h-max max-md:visible max-md:-translate-y-4 max-md:translate-y-0 max-md:opacity-100 max-md:transition-all
 							md:bottom-0 md:group-hover:visible md:group-hover:opacity-100"
 			>
 				<div class="mx-auto flex flex-row flex-nowrap gap-2">

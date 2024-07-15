@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isDesktop } from "$lib/utils/isDesktop";
 	import { createEventDispatcher, onMount } from "svelte";
-	import { repliedOnMessage } from "$lib/stores/repliedOnMessage";
 	import type { Message } from "$lib/types/Message";
 
 	export let value = "";
@@ -9,15 +8,10 @@
 	export let maxRows: null | number = null;
 	export let placeholder = "";
 	export let disabled = false;
+	export let messageReplied: Message | undefined;
 
 	let textareaElement: HTMLTextAreaElement;
 	let isCompositionOn = false;
-
-	let messageReplied: Message | undefined;
-
-	repliedOnMessage.subscribe((val: Message | undefined) => {
-		messageReplied = val;
-	});
 
 	const dispatch = createEventDispatcher<{ submit: void }>();
 
